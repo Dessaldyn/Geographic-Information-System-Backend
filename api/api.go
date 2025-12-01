@@ -53,8 +53,7 @@ func ConnectDB() {
 
 	mongoURI := os.Getenv("MONGO_URI")
 	if mongoURI == "" {
-		// Fallback hardcode (tidak disarankan untuk production, tapi oke untuk dev)
-		mongoURI = "mongodb+srv://sriwahyuni_db_user:EgZ2GXRliZQ1TYA7@cluster23.gnmjc2n.mongodb.net/ujianSIG"
+		log.Fatal("❌ FATAL ERROR: MONGO_URI tidak ditemukan!")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
