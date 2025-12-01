@@ -37,7 +37,12 @@ type Lokasi struct {
 }
 
 // --- FUNGSI UTAMA (Dipanggil oleh main.go) ---
-
+func Handler(w http.ResponseWriter, r *http.Request) {
+	if App == nil {
+		Init()
+	}
+	App.ServeHTTP(w, r)
+}
 func Init() {
 	// Coba load .env (hanya efek di lokal)
 	_ = godotenv.Load()
