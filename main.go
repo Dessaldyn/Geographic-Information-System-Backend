@@ -6,7 +6,7 @@ import (
 	"os"
 
 	// Pastikan nama ini sesuai dengan yang ada di file go.mod
-	"backend-go/api" 
+	api "backend-go/api"
 )
 
 // --- 1. SETUP AWAL (INIT) ---
