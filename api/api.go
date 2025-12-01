@@ -16,7 +16,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// Global Variables
+// Global Variable agar bisa diakses main.go
 var (
 	App        *gin.Engine
 	collection *mongo.Collection
@@ -36,13 +36,12 @@ type Lokasi struct {
 	Koordinat GeoJSON            `json:"koordinat" bson:"koordinat"`
 }
 
-// --- FUNGSI UTAMA ---
+// --- FUNGSI UTAMA (Dipanggil oleh main.go) ---
 
 func Init() {
-	// Load .env (Hanya akan berhasil jika dijalankan di lokal/laptop)
-	// Error kita abaikan karena di Vercel tidak pakai file .env tapi Env Vars
+	// Coba load .env (hanya efek di lokal)
 	_ = godotenv.Load()
-
+	
 	ConnectDB()
 	SetupRouter()
 }
@@ -52,12 +51,10 @@ func ConnectDB() {
 		return
 	}
 
-	// REVISI: HANYA AMBIL DARI ENV
 	mongoURI := os.Getenv("MONGO_URI")
-
-	// Jika kosong, matikan aplikasi dan beri pesan error
 	if mongoURI == "" {
-		log.Fatal("❌ FATAL ERROR: MONGO_URI tidak ditemukan! Pastikan file .env ada atau Environment Variable sudah diset.")
+		// Fallback hardcode (tidak disarankan untuk production, tapi oke untuk dev)
+		mongoURI = "mongodb+srv://sriwahyuni_db_user:EgZ2GXRliZQ1TYA7@cluster23.gnmjc2n.mongodb.net/ujianSIG"
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -65,12 +62,14 @@ func ConnectDB() {
 
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
 	if err != nil {
-		log.Fatal("❌ Gagal buat client Mongo:", err)
+		log.Println("❌ Gagal buat client Mongo:", err)
+		return
 	}
 
 	err = client.Ping(ctx, nil)
 	if err != nil {
-		log.Fatal("❌ Gagal ping Mongo:", err)
+		log.Println("❌ Gagal ping Mongo:", err)
+		return
 	}
 
 	log.Println("✅ Terhubung ke MongoDB Atlas")
@@ -81,14 +80,12 @@ func SetupRouter() {
 	App = gin.New()
 	App.Use(gin.Recovery())
 
-	// Konfigurasi CORS (Agar Frontend bisa akses)
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	config.AllowHeaders = []string{"Origin", "Content-Type", "Accept"}
 	App.Use(cors.New(config))
 
-	// Routes
 	App.GET("/api/lokasi", getLokasi)
 	App.POST("/api/lokasi", createLokasi)
 	App.PUT("/api/lokasi", updateLokasi)
